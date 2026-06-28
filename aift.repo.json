@@ -1,0 +1,23 @@
+{
+  "schema": "https://aifreedomtrust.org/schemas/aift.repo.schema.json",
+  "name": "OpenMontage",
+  "layer": "applied-business",
+  "role": "federated repository participating in the AIFT operating system",
+  "workspacePath": "/data/data/com.termux/files/home/AIFT/OpenMontage",
+  "federation": {
+    "workspace": "AIFT",
+    "controlPlane": "/data/data/com.termux/files/home/AIFT/aift-os.sh",
+    "manifest": "/data/data/com.termux/files/home/AIFT/manifests/workspace.json"
+  },
+  "commands": {
+    "status": "git status --short",
+    "pull": "git pull --ff-only",
+    "verify": "git status --short"
+  },
+  "standards": {
+    "localFirst": true,
+    "inspectable": true,
+    "sovereignByDefault": true,
+    "aiBehindProviderInterfaces": true
+  }
+}

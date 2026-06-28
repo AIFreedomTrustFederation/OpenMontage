@@ -1,0 +1,9 @@
+{
+  "name": "OpenMontage",
+  "role": "sovereign-repository",
+  "sovereign": true,
+  "managedBy": "AIFT-OS",
+  "dependencies": [],
+  "capabilities": [],
+  "commandsPath": ".aift/commands"
+}
