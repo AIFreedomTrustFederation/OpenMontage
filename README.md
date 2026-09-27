@@ -650,10 +650,16 @@ For bugs, feature requests, and workflow discussions, use [GitHub Issues](https:
 ## Testing
 
 ```bash
-# Run contract tests (no API keys needed)
+# Reproduce the dependency-locked contract gate (Python 3.12; no API keys needed)
+VENV_DIR="$(mktemp -d)/openmontage-contracts"
+python3.12 -m venv "$VENV_DIR"
+. "$VENV_DIR/bin/activate"
+python -m pip install --require-hashes -r requirements-dev.lock
 make test-contracts
+git diff --check
+test -z "$(git status --porcelain)"
 
-# Run all tests
+# Run the broader suite from the same locked environment
 make test
 ```
 
