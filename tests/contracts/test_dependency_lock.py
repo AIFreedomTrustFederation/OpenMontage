@@ -9,6 +9,7 @@ from packaging.utils import canonicalize_name
 
 ROOT = Path(__file__).resolve().parents[2]
 LOCK = ROOT / "requirements-dev.lock"
+MAKEFILE = ROOT / "Makefile"
 LOCKED_PACKAGE = re.compile(r"^([A-Za-z0-9_.-]+)==([^ \\]+)", re.MULTILINE)
 
 
@@ -43,3 +44,11 @@ def test_dependency_lock_covers_declared_requirements_with_hashes() -> None:
         block_end = matches[index + 1].start() if index + 1 < len(matches) else len(lock_text)
         block = lock_text[match.start():block_end]
         assert "--hash=sha256:" in block, f"{match.group(1)} has no approved artifact hash"
+
+
+def test_install_dev_uses_hashed_dependency_lock() -> None:
+    makefile = MAKEFILE.read_text(encoding="utf-8")
+    assert (
+        "install-dev:\n"
+        "\t$(PYTHON) -m pip install --require-hashes -r requirements-dev.lock\n"
+    ) in makefile
