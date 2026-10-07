@@ -34,7 +34,7 @@ install:
 	$(PYTHON) -m pip install -r requirements.txt
 
 install-dev:
-	$(PYTHON) -m pip install -r requirements-dev.txt
+	$(PYTHON) -m pip install --require-hashes -r requirements-dev.lock
 
 install-gpu:
 	$(PYTHON) -m pip install -r requirements-gpu.txt
