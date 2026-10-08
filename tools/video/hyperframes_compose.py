@@ -220,6 +220,8 @@ class HyperFramesCompose(BaseTool):
 
     _NODE_FLOOR_MAJOR = 22
     _NPM_PACKAGE = "hyperframes"  # published npm name (NOT @hyperframes/cli — that's 404)
+    _NPM_VERSION = "0.8.140"
+    _NPM_SPEC = f"{_NPM_PACKAGE}@{_NPM_VERSION}"
     # Process-level cache for the npm resolve check. Shape:
     #   {"version": "0.4.5"}   → package resolves
     #   {"error": "<short>"}   → resolution failed (offline, unpublished, etc.)
@@ -254,7 +256,7 @@ class HyperFramesCompose(BaseTool):
         on PATH, which meant `runtime_available: True` on any machine with
         Node + FFmpeg — even offline, even if npm was down, even if the
         package was unpublished. This method performs a cheap
-        `npm view hyperframes version` (5s timeout) and caches the answer
+        `npm view hyperframes@<pinned-version> version` (5s timeout) and caches the answer
         for the rest of the process.
 
         Returns {"version": "X.Y.Z"} on success, {"error": "<short>"} on any
@@ -270,7 +272,7 @@ class HyperFramesCompose(BaseTool):
 
         try:
             proc = subprocess.run(
-                [npm, "view", cls._NPM_PACKAGE, "version"],
+                [npm, "view", cls._NPM_SPEC, "version"],
                 capture_output=True,
                 text=True,
                 timeout=5,
@@ -1128,7 +1130,7 @@ class HyperFramesCompose(BaseTool):
         want to raise CalledProcessError on non-zero exits — the caller
         parses lint/validate/render exit codes itself.
         """
-        cmd = ["npx", "--yes", "hyperframes", *args]
+        cmd = ["npx", "--yes", self._NPM_SPEC, *args]
         # On Windows, resolve the .cmd wrapper so subprocess can find it
         # without shell=True.
         if os.name == "nt":
