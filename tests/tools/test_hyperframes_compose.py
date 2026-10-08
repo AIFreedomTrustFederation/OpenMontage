@@ -383,6 +383,13 @@ def test_hyperframes_cli_disables_telemetry(monkeypatch):
 def test_hyperframes_cli_uses_pinned_npm_release():
     assert HyperFramesCompose._NPM_SPEC == "hyperframes@0.8.140"
 
+    makefile = (Path(__file__).resolve().parents[2] / "Makefile").read_text(
+        encoding="utf-8"
+    )
+    assert "HYPERFRAMES_NPM_SPEC := hyperframes@0.8.140" in makefile
+    assert makefile.count("HYPERFRAMES_NO_TELEMETRY=1 npx") == 2
+    assert makefile.count("$(HYPERFRAMES_NPM_SPEC) --version") == 2
+
 
 # ------------------------------------------------------------------
 # video_compose runtime routing
