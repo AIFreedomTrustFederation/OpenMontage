@@ -9,6 +9,7 @@ in tests/qa/test_09_hyperframes_compose.py and are opt-in.
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -351,6 +352,26 @@ def test_hyperframes_render_requires_workspace():
     # Depending on runtime availability, error mentions either workspace or runtime.
     err = (result.error or "").lower()
     assert ("workspace" in err) or ("runtime" in err) or ("hyperframes" in err)
+
+
+def test_hyperframes_cli_disables_telemetry(monkeypatch):
+    captured: dict[str, Any] = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(
+        "tools.video.hyperframes_compose.subprocess.run", fake_run
+    )
+
+    HyperFramesCompose()._run_hf(
+        ["lint", "--json"], cwd=None, timeout=1, check=False
+    )
+
+    assert captured["command"] == ["npx", "--yes", "hyperframes", "lint", "--json"]
+    assert captured["env"]["HYPERFRAMES_NO_TELEMETRY"] == "1"
 
 
 # ------------------------------------------------------------------
