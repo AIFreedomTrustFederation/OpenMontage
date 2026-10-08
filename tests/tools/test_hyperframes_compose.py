@@ -370,8 +370,18 @@ def test_hyperframes_cli_disables_telemetry(monkeypatch):
         ["lint", "--json"], cwd=None, timeout=1, check=False
     )
 
-    assert captured["command"] == ["npx", "--yes", "hyperframes", "lint", "--json"]
+    assert captured["command"] == [
+        "npx",
+        "--yes",
+        "hyperframes@0.8.140",
+        "lint",
+        "--json",
+    ]
     assert captured["env"]["HYPERFRAMES_NO_TELEMETRY"] == "1"
+
+
+def test_hyperframes_cli_uses_pinned_npm_release():
+    assert HyperFramesCompose._NPM_SPEC == "hyperframes@0.8.140"
 
 
 # ------------------------------------------------------------------
