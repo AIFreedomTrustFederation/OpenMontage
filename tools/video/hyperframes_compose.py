@@ -1135,6 +1135,8 @@ class HyperFramesCompose(BaseTool):
             resolved = shutil.which(cmd[0])
             if resolved:
                 cmd[0] = resolved
+        env = os.environ.copy()
+        env["HYPERFRAMES_NO_TELEMETRY"] = "1"
         try:
             return subprocess.run(
                 cmd,
@@ -1143,6 +1145,7 @@ class HyperFramesCompose(BaseTool):
                 timeout=timeout,
                 cwd=str(cwd) if cwd else None,
                 check=False,
+                env=env,
             )
         except subprocess.TimeoutExpired as e:
             # Surface timeouts as a failed CompletedProcess so callers get a
