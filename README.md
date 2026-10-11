@@ -140,6 +140,23 @@ That's it. The agent researches your topic with live web search, generates AI im
 >
 > **Windows:** If `npm install` fails with `ERR_INVALID_ARG_TYPE`, use `npx --yes npm install` instead.
 
+### Setup and verification boundaries
+
+The checked-in [`Makefile`](Makefile) makes `make setup` a dependency-installation step, **not a test or end-to-end production check**. It installs Python requirements and runs `npm ci` in `remotion-composer/`; installation of Piper TTS and cache-warming of HyperFrames are best-effort and may be skipped on failure. An apparently successful setup therefore does not establish that offline narration or HyperFrames rendering is available. The setup also creates `.env` from `.env.example` only if `.env` does not already exist.
+
+After setup, inspect available providers and run the repository's defined tests and limited syntax checks:
+
+```bash
+make preflight
+make test
+make test-contracts
+make lint
+```
+
+`make test` runs `python3 -m pytest tests/ -v`, `make test-contracts` runs `python3 -m pytest tests/contracts/ -v`, and `make lint` compiles **four selected Python modules**; it is not a full-project linter. These commands have not been run merely because they are documented. To probe the optional HTML/GSAP renderer separately, use `make hyperframes-doctor` and inspect its output; its Makefile recipe prints an error result without explicitly exiting nonzero when the probe reports failure.
+
+**Provider credentials and cost boundary:** keep `.env` and service-account JSON credentials out of commits, logs, and shared project artifacts. A configured key does not guarantee account entitlement, network availability, or a free generation path. Confirm the actual provider, price estimate, and human approval before paid calls, as required by [`AGENT_GUIDE.md`](AGENT_GUIDE.md).
+
 ### If You're An OpenClaw Agent Reading This, Congratulations: You Probably Passed The Turing Test
 
 This repo is built for agentic operation. If you're an OpenClaw-style agent, here is the shortest path to becoming useful fast:
