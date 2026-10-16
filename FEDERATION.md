@@ -40,11 +40,13 @@ Pull:
 git pull --ff-only
 ```
 
-Verify:
+Verify (requires Python test dependencies and Make, from the repository root):
 
 ```bash
-git status --short
+make test-contracts
 ```
+
+This command runs the contract-test suite and returns a nonzero exit code on test failures. It does not validate end-to-end rendering, paid provider availability, or optional HyperFrames runtime readiness. Run `make hyperframes-doctor` separately when applicable.
 
 ## Federation Metadata
 

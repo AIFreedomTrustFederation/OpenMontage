@@ -12,7 +12,7 @@
   "commands": {
     "status": "git status --short",
     "pull": "git pull --ff-only",
-    "verify": "git status --short"
+    "verify": "make test-contracts"
   },
   "standards": {
     "localFirst": true,
