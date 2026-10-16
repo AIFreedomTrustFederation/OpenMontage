@@ -153,7 +153,7 @@ make test-contracts
 make lint
 ```
 
-`make test` runs `python3 -m pytest tests/ -v`, `make test-contracts` runs `python3 -m pytest tests/contracts/ -v`, and `make lint` compiles **four selected Python modules**; it is not a full-project linter. These commands have not been run merely because they are documented. To probe the optional HTML/GSAP renderer separately, use `make hyperframes-doctor` and inspect its output; its Makefile recipe prints an error result without explicitly exiting nonzero when the probe reports failure.
+`make test` runs `python3 -m pytest tests/ -v`, `make test-contracts` runs `python3 -m pytest tests/contracts/ -v`, and `make lint` compiles **four selected Python modules**; it is not a full-project linter. These commands have not been run merely because they are documented. To probe the optional HTML/GSAP renderer separately, use `make hyperframes-doctor`. The command prints its diagnostic report and exits nonzero when the probe fails, so scripts can use it as a readiness gate. A passing doctor check does not guarantee that a particular render will succeed.
 
 **Provider credentials and cost boundary:** keep `.env` and service-account JSON credentials out of commits, logs, and shared project artifacts. A configured key does not guarantee account entitlement, network availability, or a free generation path. Confirm the actual provider, price estimate, and human approval before paid calls, as required by [`AGENT_GUIDE.md`](AGENT_GUIDE.md).
 

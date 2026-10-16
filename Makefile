@@ -56,7 +56,7 @@ preflight:
 
 hyperframes-doctor:
 	@echo "==> Probing HyperFrames runtime (node/ffmpeg/npx + hyperframes doctor)..."
-	$(PYTHON) -c "from tools.video.hyperframes_compose import HyperFramesCompose; r=HyperFramesCompose().execute({'operation':'doctor'}); import json; print(json.dumps(r.data, indent=2)); print('OK' if r.success else f'FAIL: {r.error}')"
+	$(PYTHON) -c "from tools.video.hyperframes_compose import HyperFramesCompose; r=HyperFramesCompose().execute({'operation':'doctor'}); import json; print(json.dumps(r.data, indent=2)); print('OK' if r.success else f'FAIL: {r.error}'); import sys; sys.exit(0 if r.success else 1)"
 
 hyperframes-warm:
 	@echo "==> Refreshing the pinned HyperFrames npx cache..."
