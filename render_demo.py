@@ -17,6 +17,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -84,28 +85,34 @@ def render_demo(name: str, props_path: Path, npx_cmd: str) -> None:
     print(f"Output:    {output_path}")
     print()
 
-    subprocess.run(
-        [
-            npx_cmd,
-            "remotion",
-            "render",
-            "src/index.tsx",
-            "Explainer",
-            str(output_path),
-            "--props",
-            str(props_path),
-            "--codec",
-            "h264",
-        ],
-        cwd=COMPOSER_DIR,
-        check=True,
-    )
+    # Render to a fresh staging directory so a successful exit cannot be
+    # mistaken for a newly produced video, and failures preserve prior output.
+    with tempfile.TemporaryDirectory(prefix=f".{name}-", dir=OUTPUT_DIR) as staging_dir:
+        staged_output = Path(staging_dir) / f"{name}.mp4"
+        subprocess.run(
+            [
+                npx_cmd,
+                "remotion",
+                "render",
+                "src/index.tsx",
+                "Explainer",
+                str(staged_output),
+                "--props",
+                str(props_path),
+                "--codec",
+                "h264",
+            ],
+            cwd=COMPOSER_DIR,
+            check=True,
+        )
+        if not staged_output.is_file() or staged_output.stat().st_size == 0:
+            raise RuntimeError(
+                f"Remotion exited successfully without producing a nonempty MP4 for {name}"
+            )
+        staged_output.replace(output_path)
 
-    if output_path.exists():
-        size_mb = output_path.stat().st_size / (1024 * 1024)
-        print(f"Done: {output_path} ({size_mb:.1f} MB)")
-    else:
-        print("Render finished without creating the expected output file.")
+    size_mb = output_path.stat().st_size / (1024 * 1024)
+    print(f"Done: {output_path} ({size_mb:.1f} MB)")
 
 
 def main(argv: list[str] | None = None) -> int:

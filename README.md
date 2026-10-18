@@ -288,6 +288,8 @@ Copy any of these into your AI coding assistant after setup. Each one runs a ful
 
 Want more? See the full **[Prompt Gallery](PROMPT_GALLERY.md)** for tested prompts with expected costs and output examples, or run `make demo` to render zero-key demo videos instantly.
 
+`make demo` requires the local Remotion/Node rendering toolchain even when no paid API keys are used. Each MP4 is rendered to a temporary staging directory and only replaces a previous video after a nonempty output is confirmed. A renderer that exits successfully without producing an MP4 is treated as a failure; a failed render leaves any previous successful MP4 intact. This checks output presence, not visual quality, audio correctness, or playback compatibility.
+
 ---
 
 ## Pipelines
