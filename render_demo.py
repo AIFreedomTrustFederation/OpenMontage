@@ -17,6 +17,7 @@ import json
 import shutil
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 
 
@@ -77,6 +78,9 @@ def render_demo(name: str, props_path: Path, npx_cmd: str) -> None:
     validate_props_file(props_path)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     output_path = OUTPUT_DIR / f"{name}.mp4"
+    # Render into a unique sibling file so a previous MP4 cannot be
+    # mistaken for this run's output, and failed renders preserve it.
+    staged_path = OUTPUT_DIR / f".{name}.{uuid.uuid4().hex}.mp4"
 
     print()
     print(f"Rendering: {name}")
@@ -84,28 +88,33 @@ def render_demo(name: str, props_path: Path, npx_cmd: str) -> None:
     print(f"Output:    {output_path}")
     print()
 
-    subprocess.run(
-        [
-            npx_cmd,
-            "remotion",
-            "render",
-            "src/index.tsx",
-            "Explainer",
-            str(output_path),
-            "--props",
-            str(props_path),
-            "--codec",
-            "h264",
-        ],
-        cwd=COMPOSER_DIR,
-        check=True,
-    )
+    try:
+        subprocess.run(
+            [
+                npx_cmd,
+                "remotion",
+                "render",
+                "src/index.tsx",
+                "Explainer",
+                str(staged_path),
+                "--props",
+                str(props_path),
+                "--codec",
+                "h264",
+            ],
+            cwd=COMPOSER_DIR,
+            check=True,
+        )
 
-    if output_path.exists():
-        size_mb = output_path.stat().st_size / (1024 * 1024)
-        print(f"Done: {output_path} ({size_mb:.1f} MB)")
-    else:
-        print("Render finished without creating the expected output file.")
+        # The renderer can exit successfully without producing a usable MP4.
+        if not staged_path.is_file() or staged_path.stat().st_size == 0:
+            raise RuntimeError(f"Render finished without a non-empty output file: {output_path}")
+        staged_path.replace(output_path)
+    finally:
+        staged_path.unlink(missing_ok=True)
+
+    size_mb = output_path.stat().st_size / (1024 * 1024)
+    print(f"Done: {output_path} ({size_mb:.1f} MB)")
 
 
 def main(argv: list[str] | None = None) -> int:

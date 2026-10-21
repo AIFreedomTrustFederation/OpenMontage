@@ -286,7 +286,7 @@ Copy any of these into your AI coding assistant after setup. Each one runs a ful
 
 > "Make a 90-second animated explainer about quantum computing for middle school students, with a fun narrator voice and custom soundtrack"
 
-Want more? See the full **[Prompt Gallery](PROMPT_GALLERY.md)** for tested prompts with expected costs and output examples, or run `make demo` to render zero-key demo videos instantly.
+Want more? See the full **[Prompt Gallery](PROMPT_GALLERY.md)** for tested prompts with expected costs and output examples, or run `make demo` to render the bundled zero-key Remotion demos. This requires Node.js, npm/npx, and a working Remotion installation. The command fails if a render does not produce a new, non-empty MP4; this verifies artifact creation, not video decodability or visual quality.
 
 ---
 
