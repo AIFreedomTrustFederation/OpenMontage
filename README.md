@@ -140,6 +140,18 @@ That's it. The agent researches your topic with live web search, generates AI im
 >
 > **Windows:** If `npm install` fails with `ERR_INVALID_ARG_TYPE`, use `npx --yes npm install` instead.
 
+### Federation checkout and integration boundary
+
+The Quick Start clone command above checks out the [upstream OpenMontage repository](https://github.com/calesthio/OpenMontage), not this federation fork. To work with the federation-maintained checkout instead, run:
+
+```bash
+git clone https://github.com/AIFreedomTrustFederation/OpenMontage.git
+cd OpenMontage
+make setup
+```
+
+The checked-in [federation manifest](aift.repo.json) and [federation role guide](FEDERATION.md) reference an Android Termux workspace at `/data/data/com.termux/files/home/AIFT`; those absolute paths describe one workspace, not a portable prerequisite for video production. The manifest's `verify` command is only `git status --short`, while [federation capabilities](.aift/capabilities.json) still mark `verify` and `test` as planned and the [federation service](.aift/services.json) as planned. These declarations do not run the media pipeline or establish a deployed federation service. Use the Makefile test commands below for repository verification.
+
 ### Setup and verification boundaries
 
 The checked-in [`Makefile`](Makefile) makes `make setup` a dependency-installation step, **not a test or end-to-end production check**. It installs Python requirements and runs `npm ci` in `remotion-composer/`; installation of Piper TTS and cache-warming of HyperFrames are best-effort and may be skipped on failure. An apparently successful setup therefore does not establish that offline narration or HyperFrames rendering is available. The setup also creates `.env` from `.env.example` only if `.env` does not already exist.
