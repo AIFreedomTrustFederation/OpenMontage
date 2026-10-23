@@ -60,8 +60,10 @@ def ensure_demo_environment() -> str:
         raise SystemExit("Error: npx is required but was not found on PATH.")
 
     if not (COMPOSER_DIR / "node_modules").exists():
-        print("Installing Remotion dependencies...")
-        subprocess.run([npm_cmd, "install"], cwd=COMPOSER_DIR, check=True)
+        if not (COMPOSER_DIR / "package-lock.json").is_file():
+            raise SystemExit("Error: Remotion package-lock.json is required for a reproducible install.")
+        print("Installing locked Remotion dependencies...")
+        subprocess.run([npm_cmd, "ci"], cwd=COMPOSER_DIR, check=True)
 
     return npx_cmd
 
@@ -92,6 +94,7 @@ def render_demo(name: str, props_path: Path, npx_cmd: str) -> None:
         subprocess.run(
             [
                 npx_cmd,
+                "--no-install",
                 "remotion",
                 "render",
                 "src/index.tsx",

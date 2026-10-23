@@ -17,12 +17,12 @@ def props(tmp_path: Path) -> Path:
 
 def _stub_renderer(monkeypatch: pytest.MonkeyPatch, output_bytes: bytes | None) -> None:
     def fake_run(args, *, cwd, check):
-        assert args[1:4] == ["remotion", "render", "src/index.tsx"]
-        assert args[4] == "Explainer"
+        assert args[1:5] == ["--no-install", "remotion", "render", "src/index.tsx"]
+        assert args[5] == "Explainer"
         assert cwd == render_demo.COMPOSER_DIR
         assert check is True
         if output_bytes is not None:
-            Path(args[5]).write_bytes(output_bytes)
+            Path(args[6]).write_bytes(output_bytes)
         return subprocess.CompletedProcess(args, 0)
 
     monkeypatch.setattr(render_demo.subprocess, "run", fake_run)
@@ -98,3 +98,52 @@ def test_successful_render_atomically_replaces_previous_mp4(
     render_demo.render_demo("fresh", props, "npx")
     assert existing.read_bytes() == b"new successful render"
     assert not list(output_dir.glob(".*.mp4"))
+
+
+def test_demo_install_uses_locked_clean_install(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    composer = tmp_path / "remotion-composer"
+    composer.mkdir()
+    (composer / "package-lock.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(render_demo, "COMPOSER_DIR", composer)
+    monkeypatch.setattr(render_demo, "find_command", lambda *names: names[0])
+    calls = []
+
+    def fake_run(args, *, cwd, check):
+        calls.append((args, cwd, check))
+        return subprocess.CompletedProcess(args, 0)
+
+    monkeypatch.setattr(render_demo.subprocess, "run", fake_run)
+    assert render_demo.ensure_demo_environment() == "npx.cmd"
+    assert calls == [(["npm.cmd", "ci"], composer, True)]
+
+
+def test_demo_refuses_unlocked_install(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    composer = tmp_path / "remotion-composer"
+    composer.mkdir()
+    monkeypatch.setattr(render_demo, "COMPOSER_DIR", composer)
+    monkeypatch.setattr(render_demo, "find_command", lambda *names: names[0])
+    monkeypatch.setattr(
+        render_demo.subprocess,
+        "run",
+        lambda *args, **kwargs: pytest.fail("Must not install without a lockfile"),
+    )
+    with pytest.raises(SystemExit, match="package-lock.json"):
+        render_demo.ensure_demo_environment()
+
+
+def test_demo_renderer_disables_npx_implicit_install(
+    tmp_path: Path, props: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(render_demo, "OUTPUT_DIR", tmp_path / "renders")
+
+    def fake_run(args, *, cwd, check):
+        assert args[:5] == ["npx", "--no-install", "remotion", "render", "src/index.tsx"]
+        Path(args[6]).write_bytes(b"demo")
+        return subprocess.CompletedProcess(args, 0)
+
+    monkeypatch.setattr(render_demo.subprocess, "run", fake_run)
+    render_demo.render_demo("secure", props, "npx")

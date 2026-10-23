@@ -286,7 +286,7 @@ Copy any of these into your AI coding assistant after setup. Each one runs a ful
 
 > "Make a 90-second animated explainer about quantum computing for middle school students, with a fun narrator voice and custom soundtrack"
 
-Want more? See the full **[Prompt Gallery](PROMPT_GALLERY.md)** for tested prompts with expected costs and output examples, or run `make demo` to render the bundled zero-key Remotion demos. This requires Node.js, npm/npx, and a working Remotion installation. The command fails if a render does not produce a new, non-empty MP4; this verifies artifact creation, not video decodability or visual quality.
+Want more? See the full **[Prompt Gallery](PROMPT_GALLERY.md)** for tested prompts with expected costs and output examples, or run `make demo` to render the bundled zero-key Remotion demos. This requires Node.js, npm/npx, and a working Remotion installation. The command fails if a render does not produce a new, non-empty MP4; this verifies artifact creation, not video decodability or visual quality. If Remotion dependencies are absent, the demo runner now requires `remotion-composer/package-lock.json` and uses `npm ci`, matching `make setup`, rather than an unlocked `npm install`. Rendering uses `npx --no-install` so a missing CLI cannot be downloaded implicitly. Existing `node_modules` contents are not revalidated; use `make setup` for a clean lockfile-based install.
 
 ---
 
