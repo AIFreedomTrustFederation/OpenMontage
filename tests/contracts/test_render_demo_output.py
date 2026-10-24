@@ -98,3 +98,14 @@ def test_successful_render_atomically_replaces_previous_mp4(
     render_demo.render_demo("fresh", props, "npx")
     assert existing.read_bytes() == b"new successful render"
     assert not list(output_dir.glob(".*.mp4"))
+
+
+def test_corrupt_nonempty_mp4_is_rejected(
+    tmp_path: Path, props: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A non-empty file is not necessarily a decodable video."""
+    monkeypatch.setattr(render_demo, "OUTPUT_DIR", tmp_path / "renders")
+    _stub_renderer(monkeypatch, b"not an MP4 container")
+    with pytest.raises(RuntimeError, match="ffprobe|decodable|video"):
+        render_demo.render_demo("corrupt", props, "npx")
+    assert not (tmp_path / "renders" / "corrupt.mp4").exists()
