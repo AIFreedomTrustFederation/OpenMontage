@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import shutil
 import subprocess
 import sys
@@ -74,6 +75,47 @@ def validate_props_file(path: Path) -> None:
         raise SystemExit(f"Error: {path} must define at least one cut.")
 
 
+
+def validate_rendered_mp4(path: Path) -> None:
+    """Require a probeable video stream and positive duration before publication."""
+    ffprobe_cmd = find_command("ffprobe", "ffprobe.exe")
+    if not ffprobe_cmd:
+        raise RuntimeError("ffprobe (from FFmpeg) is required to verify demo MP4 output.")
+
+    try:
+        result = subprocess.run(
+            [
+                ffprobe_cmd,
+                "-v",
+                "error",
+                "-show_entries",
+                "stream=codec_type,width,height:format=duration",
+                "-of",
+                "json",
+                str(path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        metadata = json.loads(result.stdout)
+        streams = metadata.get("streams", [])
+        has_video = isinstance(streams, list) and any(
+            isinstance(stream, dict)
+            and stream.get("codec_type") == "video"
+            and isinstance(stream.get("width"), int)
+            and stream["width"] > 0
+            and isinstance(stream.get("height"), int)
+            and stream["height"] > 0
+            for stream in streams
+        )
+        duration = float(metadata.get("format", {}).get("duration", 0))
+        if not has_video or not math.isfinite(duration) or duration <= 0:
+            raise ValueError("missing video stream or positive duration")
+    except (subprocess.CalledProcessError, ValueError, TypeError, AttributeError) as exc:
+        raise RuntimeError(f"Rendered MP4 failed ffprobe validation: {path}") from exc
+
+
 def render_demo(name: str, props_path: Path, npx_cmd: str) -> None:
     validate_props_file(props_path)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -109,6 +151,7 @@ def render_demo(name: str, props_path: Path, npx_cmd: str) -> None:
         # The renderer can exit successfully without producing a usable MP4.
         if not staged_path.is_file() or staged_path.stat().st_size == 0:
             raise RuntimeError(f"Render finished without a non-empty output file: {output_path}")
+        validate_rendered_mp4(staged_path)
         staged_path.replace(output_path)
     finally:
         staged_path.unlink(missing_ok=True)
