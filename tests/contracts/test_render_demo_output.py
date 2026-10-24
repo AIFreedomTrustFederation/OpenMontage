@@ -182,8 +182,7 @@ def test_missing_ffprobe_fails_closed(
 def test_real_ffprobe_accepts_video_and_rejects_invalid_bytes(tmp_path: Path) -> None:
     ffmpeg = shutil.which("ffmpeg")
     ffprobe = shutil.which("ffprobe")
-    if not ffmpeg or not ffprobe:
-        pytest.skip("FFmpeg tools not installed")
+    assert ffmpeg and ffprobe, "FFmpeg and ffprobe are required for the demo integration test"
 
     valid = tmp_path / "valid.mp4"
     subprocess.run(
